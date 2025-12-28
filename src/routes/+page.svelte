@@ -14,6 +14,7 @@
     const modeOptions = [
         { value: "normal", label: "Normal" },
         { value: "ict", label: "ICT" },
+        { value: "both", label: "Both (Combined)" },
     ];
 
     // Helper to determine signal badge color
@@ -38,6 +39,9 @@
 
             if (mode === "ict") {
                 endpoint = "/api/trading/ict/analyze";
+                params.append("higherTimeframe", higherTimeframe);
+            } else if (mode === "both") {
+                endpoint = "/api/trading/analyze/both";
                 params.append("higherTimeframe", higherTimeframe);
             }
 
@@ -114,7 +118,7 @@
                     </select>
                 </div>
 
-                {#if mode === "ict"}
+                {#if mode === "ict" || mode === "both"}
                     <div class="form-control">
                         <label class="label" for="higherTimeframe">
                             <span class="label-text font-semibold"
@@ -181,26 +185,38 @@
         {@const signalType =
             mode === "ict"
                 ? result.signal.type
-                : result.signal.signal}
+                : mode === "both"
+                    ? result.consensus.recommendation
+                    : result.signal.signal}
         <div class="card bg-base-100 shadow-xl mt-4">
             <div class="card-body">
                 <h2 class="card-title">
-                    {mode === "ict" ? "ICT" : "Market"} Analysis - {result
-                        .marketData.symbol}
+                    {mode === "ict"
+                        ? "ICT"
+                        : mode === "both"
+                            ? "Combined"
+                            : "Market"} Analysis - {mode === "both"
+                        ? result.symbol
+                        : result.marketData.symbol}
                 </h2>
 
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <div class="stat">
                         <div class="stat-title">Current Price</div>
                         <div class="stat-value text-2xl">
-                            {result.marketData.currentPrice.toLocaleString()}
+                            {mode === "both"
+                                ? result.currentPrice.toLocaleString()
+                                : result.marketData.currentPrice.toLocaleString()}
                         </div>
                         <div class="stat-desc">
-                            {result.marketData.priceChangePercent > 0
-                                ? "+"
-                                : ""}{result.marketData.priceChangePercent.toFixed(
-                                2,
-                            )}%
+                            {mode === "both"
+                                ? ""
+                                : (result.marketData.priceChangePercent > 0
+                                    ? "+"
+                                    : "") +
+                                  result.marketData.priceChangePercent.toFixed(
+                                      2,
+                                  ) + "%"}
                         </div>
                     </div>
 
@@ -214,9 +230,13 @@
                             </span>
                         </div>
                         <div class="stat-desc">
-                            Confidence: {(
-                                result.signal.confidence * 100
-                            ).toFixed(1)}%
+                            {mode === "both"
+                                ? `Consensus: ${
+                                      result.consensus.agree ? "✓" : "✗"
+                                  }`
+                                : `Confidence: ${(
+                                      result.signal.confidence * 100
+                                  ).toFixed(1)}%`}
                         </div>
                     </div>
 
@@ -227,6 +247,18 @@
                                 {result.trend.trend}
                             </div>
                             <div class="stat-desc">{result.trend.strength}</div>
+                        </div>
+                    {:else if mode === "both"}
+                        <div class="stat">
+                            <div class="stat-title">Stronger Signal</div>
+                            <div class="stat-value text-2xl">
+                                {result.consensus.strongerSignal.toUpperCase()}
+                            </div>
+                            <div class="stat-desc">
+                                {result.consensus.agree
+                                    ? "Analyses Agree"
+                                    : "Analyses Differ"}
+                            </div>
                         </div>
                     {:else}
                         <div class="stat">
@@ -241,6 +273,67 @@
                 </div>
 
                 <div class="divider"></div>
+
+                {#if mode === "both"}
+                    <h3 class="text-xl font-semibold mb-2">Consensus</h3>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="card bg-base-200">
+                            <div class="card-body p-4">
+                                <h4 class="font-semibold">Agreement</h4>
+                                <p>
+                                    {result.consensus.agree
+                                        ? "✓ Both analyses agree"
+                                        : "✗ Analyses differ"}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card bg-base-200">
+                            <div class="card-body p-4">
+                                <h4 class="font-semibold">Recommendation</h4>
+                                <p class="text-2xl font-bold">
+                                    {result.consensus.recommendation}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card bg-base-200">
+                            <div class="card-body p-4">
+                                <h4 class="font-semibold">Standard Analysis</h4>
+                                <p>Signal: {result.standardAnalysis.signal.signal}</p>
+                                <p>
+                                    Trend: {result.standardAnalysis.trend.trend}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card bg-base-200">
+                            <div class="card-body p-4">
+                                <h4 class="font-semibold">ICT Analysis</h4>
+                                <p>Signal: {result.ictAnalysis.signal.signal}</p>
+                                <p>
+                                    Setup:{" "}
+                                    {result.ictAnalysis.setup
+                                        ? result.ictAnalysis.setup.primary
+                                        : "N/A"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <h3 class="text-xl font-semibold mb-2">
+                        Standard Analysis Summary
+                    </h3>
+                    <div class="alert alert-info">
+                        <span>{result.standardAnalysis.summary}</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <h3 class="text-xl font-semibold mb-2">ICT Analysis Summary</h3>
+                    <div class="alert alert-info">
+                        <span>{result.ictAnalysis.summary}</span>
+                    </div>
+                {/if}
 
                 {#if mode === "normal"}
                     <h3 class="text-xl font-semibold mb-2">
@@ -414,22 +507,33 @@
                 <div class="divider"></div>
 
                 <h3 class="text-xl font-semibold mb-2">AI Reasoning</h3>
-                <div class="alert alert-info">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        class="stroke-current shrink-0 w-6 h-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
-                    </svg>
-                    <span>{result.signal.reasoning}</span>
-                </div>
+                {#if mode === "both"}
+                    <div class="alert alert-info mb-4">
+                        <h4 class="font-semibold">Standard Analysis:</h4>
+                        <span>{result.standardAnalysis.signal.reasoning}</span>
+                    </div>
+                    <div class="alert alert-info">
+                        <h4 class="font-semibold">ICT Analysis:</h4>
+                        <span>{result.ictAnalysis.signal.reasoning}</span>
+                    </div>
+                {:else}
+                    <div class="alert alert-info">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            class="stroke-current shrink-0 w-6 h-6"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 011-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                        <span>{result.signal.reasoning}</span>
+                    </div>
+                {/if}
 
                 {#if mode === "ict" && result.signal.setup}
                     <div class="divider"></div>
@@ -452,6 +556,34 @@
                     </h3>
                     <ul class="list-disc list-inside">
                         {#each result.signal.setup.invalidations as invalidation}
+                            <li>{invalidation}</li>
+                        {/each}
+                    </ul>
+                {/if}
+
+                {#if mode === "both" && result.ictAnalysis.setup}
+                    <div class="divider"></div>
+                    <h3 class="text-xl font-semibold mb-2">
+                        ICT Primary Setup
+                    </h3>
+                    <div class="alert alert-success">
+                        <span>{result.ictAnalysis.setup.primary}</span>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mb-2 mt-4">
+                        ICT Confirmations
+                    </h3>
+                    <ul class="list-disc list-inside">
+                        {#each result.ictAnalysis.setup.confirmations as confirmation}
+                            <li>{confirmation}</li>
+                        {/each}
+                    </ul>
+
+                    <h3 class="text-xl font-semibold mb-2 mt-4">
+                        ICT Invalidations
+                    </h3>
+                    <ul class="list-disc list-inside">
+                        {#each result.ictAnalysis.setup.invalidations as invalidation}
                             <li>{invalidation}</li>
                         {/each}
                     </ul>
