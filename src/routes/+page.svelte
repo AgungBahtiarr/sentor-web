@@ -17,6 +17,7 @@
     const modeOptions = [
         { value: "normal", label: "Normal" },
         { value: "ict", label: "ICT" },
+        { value: "fighter", label: "Fighter (Scalping)" },
         { value: "both", label: "Both (Combined)" },
     ];
 
@@ -59,6 +60,8 @@
             if (mode === "ict") {
                 endpoint = "/api/trading/ict/analyze";
                 params.append("higherTimeframe", higherTimeframe);
+            } else if (mode === "fighter") {
+                endpoint = "/api/trading/fighter/analyze";
             } else if (mode === "both") {
                 endpoint = "/api/trading/analyze/both";
                 params.append("higherTimeframe", higherTimeframe);
@@ -209,15 +212,17 @@
                     : result.signal ? result.signal.signal : "NO_SIGNAL"}
         <div class="card bg-base-100 shadow-xl mt-4">
             <div class="card-body">
-                <h2 class="card-title">
-                    {mode === "ict"
-                        ? "ICT"
-                        : mode === "both"
-                            ? "Combined"
-                            : "Market"} Analysis - {mode === "both"
-                        ? result.symbol
-                        : result.marketData.symbol}
-                </h2>
+                 <h2 class="card-title">
+                     {mode === "ict"
+                         ? "ICT"
+                         : mode === "fighter"
+                             ? "Fighter (Scalping)"
+                             : mode === "both"
+                                 ? "Combined"
+                                 : "Market"} Analysis - {mode === "both"
+                         ? result.symbol
+                         : result.marketData.symbol}
+                 </h2>
 
                 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     <div class="stat">
@@ -256,11 +261,13 @@
                                  : `Confidence: ${(
                                        result.signal.confidence * 100
                                    ).toFixed(1)}%`}
-                             {#if mode === "ict" && result.signal.confidence < 0.75 && result.signal.confidence >= 0.60}
-                                 ⚠️ LOW CONFIDENCE
-                             {:else if mode === "ict" && result.signal.confidence < 0.85 && result.signal.confidence >= 0.75}
-                                 ⚡ MODERATE CONFIDENCE
-                             {/if}
+                              {#if mode === "ict" && result.signal.confidence < 0.75 && result.signal.confidence >= 0.60}
+                                  ⚠️ LOW CONFIDENCE
+                              {:else if mode === "ict" && result.signal.confidence < 0.85 && result.signal.confidence >= 0.75}
+                                  ⚡ MODERATE CONFIDENCE
+                              {:else if mode === "fighter" && result.signal.confidence < 0.65 && result.signal.confidence >= 0.5}
+                                  ⚠️ SCALP RISK: Higher frequency needed, tight stops essential
+                              {/if}
                          </div>
                     </div>
 
@@ -609,24 +616,30 @@
                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 011-18 0 9 9 0 0118 0z"
                              ></path>
                          </svg>
-                         <div class="space-y-2">
-                             {#if mode === "ict" && result.signal}
-                                 {@html formatICTReasoning(result.signal.reasoning)}
-                             {:else if result.signal}
-                                 <span>{result.signal.reasoning}</span>
-                             {/if}
-                             {#if mode === "ict" && result.signal && result.signal.signalMethod}
-                                 <div><strong>Method:</strong> {result.signal.signalMethod}</div>
-                             {/if}
-                             {#if mode === "ict" && result.signal && result.signal.timeframeAnalysis}
-                                 <div><strong>Timeframe Analysis:</strong></div>
-                                 <ul class="list-disc list-inside ml-4">
-                                     {#each result.signal.timeframeAnalysis.split('-').filter(line => line.trim()) as line}
-                                         <li>{line.trim()}</li>
-                                     {/each}
-                                 </ul>
-                             {/if}
-                         </div>
+                          <div class="space-y-2">
+                              {#if mode === "ict" && result.signal}
+                                  {@html formatICTReasoning(result.signal.reasoning)}
+                              {:else if result.signal}
+                                  <span>{result.signal.reasoning}</span>
+                              {/if}
+                              {#if mode === "ict" && result.signal && result.signal.signalMethod}
+                                  <div><strong>Method:</strong> {result.signal.signalMethod}</div>
+                              {/if}
+                              {#if mode === "ict" && result.signal && result.signal.timeframeAnalysis}
+                                  <div><strong>Timeframe Analysis:</strong></div>
+                                  <ul class="list-disc list-inside ml-4">
+                                      {#each result.signal.timeframeAnalysis.split('-').filter(line => line.trim()) as line}
+                                          <li>{line.trim()}</li>
+                                      {/each}
+                                  </ul>
+                              {/if}
+                              {#if mode === "fighter" && result.meta && result.meta.scalpingTimeframe}
+                                  <div><strong>Scalping Timeframe:</strong> {result.meta.scalpingTimeframe}</div>
+                              {/if}
+                              {#if mode === "fighter"}
+                                  <div><strong>⚡ HIGH FREQUENCY:</strong> Monitor closely, exit quickly on momentum shift</div>
+                              {/if}
+                          </div>
                      </div>
                  {/if}
 
