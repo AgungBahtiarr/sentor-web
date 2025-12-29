@@ -291,16 +291,16 @@
                                      : "Analyses Differ"}
                              </div>
                          </div>
-                     {:else if mode === "ict" && result.signal && result.signal.riskManagement}
-                         <div class="stat">
-                             <div class="stat-title">Risk/Reward</div>
-                             <div class="stat-value text-2xl">
-                                 {result.signal.riskManagement.riskReward.toFixed(
-                                     2,
-                                 )}
-                             </div>
-                         </div>
-                     {:else if mode === "ict" && result.signal}
+                      {:else if (mode === "ict" && result.signal && result.signal.riskManagement) || (mode === "fighter" && result.meta && result.meta.riskManagement)}
+                          <div class="stat">
+                              <div class="stat-title">Risk/Reward {mode === "fighter" ? "(Scalp)" : ""}</div>
+                              <div class="stat-value text-2xl">
+                                  {(mode === "fighter" ? result.meta.riskManagement.riskReward : result.signal.riskManagement.riskReward).toFixed(
+                                      2,
+                                  )}
+                              </div>
+                          </div>
+                      {:else if mode === "ict" && result.signal}
                          <div class="stat">
                              <div class="stat-title">Signal Type</div>
                              <div class="stat-value text-2xl">
@@ -379,115 +379,115 @@
                      </div>
                 {/if}
 
-                {#if mode === "normal"}
-                    <h3 class="text-xl font-semibold mb-2">
-                        Technical Indicators
-                    </h3>
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">RSI</h4>
-                                <p class="text-2xl">
-                                    {result.indicators.rsi.toFixed(2)}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">MACD</h4>
-                                <p>
-                                    Line: {result.indicators.macd.macdLine.toFixed(
-                                        4,
-                                    )}
-                                </p>
-                                <p>
-                                    Signal: {result.indicators.macd.signalLine.toFixed(
-                                        4,
-                                    )}
-                                </p>
-                                <p>
-                                    Histogram: {result.indicators.macd.histogram.toFixed(
-                                        4,
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">EMA</h4>
-                                <p>
-                                    EMA 9: {result.indicators.ema.ema9.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                                <p>
-                                    EMA 21: {result.indicators.ema.ema21.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                                <p>
-                                    EMA 50: {result.indicators.ema.ema50.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">
-                                    Support & Resistance
-                                </h4>
-                                <p>
-                                    Nearest Support: {result.supportResistance.nearestSupport.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                                <p>
-                                    Nearest Resistance: {result.supportResistance.nearestResistance.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                {/if}
-
-                 {#if mode === "ict" && result.signal.riskManagement}
-                     <h3 class="text-xl font-semibold mb-2">Risk Management</h3>
-                    <div class="grid gap-4 md:grid-cols-3">
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">Entry</h4>
-                                <p class="text-2xl">
-                                    {result.signal.riskManagement.entry.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">Stop Loss</h4>
-                                <p class="text-2xl">
-                                    {result.signal.riskManagement.stopLoss.toFixed(
-                                        2,
-                                    )}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="card bg-base-200">
-                            <div class="card-body p-4">
-                                <h4 class="font-semibold">Take Profit</h4>
-                                <p class="text-2xl">
-                                    {result.signal.riskManagement.takeProfit
-                                        .map((tp) => tp.toFixed(2))
-                                        .join(", ")}
-                                </p>
-                            </div>
-                        </div>
+                 {#if mode === "normal" || mode === "fighter"}
+                     <h3 class="text-xl font-semibold mb-2">
+                         Technical Indicators {mode === "fighter" ? "(Scalping)" : ""}
+                     </h3>
+                     <div class="grid gap-4 md:grid-cols-2">
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">RSI</h4>
+                                 <p class="text-2xl">
+                                     {result.indicators.rsi.toFixed(2)}
+                                 </p>
+                             </div>
+                         </div>
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">MACD</h4>
+                                 <p>
+                                     Line: {result.indicators.macd.macdLine.toFixed(
+                                         4,
+                                     )}
+                                 </p>
+                                 <p>
+                                     Signal: {result.indicators.macd.signalLine.toFixed(
+                                         4,
+                                     )}
+                                 </p>
+                                 <p>
+                                     Histogram: {result.indicators.macd.histogram.toFixed(
+                                         4,
+                                     )}
+                                 </p>
+                             </div>
+                         </div>
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">EMA</h4>
+                                 <p>
+                                     EMA 9: {result.indicators.ema.ema9.toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                                 <p>
+                                     EMA 21: {result.indicators.ema.ema21.toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                                 <p>
+                                     EMA 50: {result.indicators.ema.ema50.toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                             </div>
+                         </div>
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">
+                                     Support & Resistance
+                                 </h4>
+                                 <p>
+                                     Nearest Support: {result.supportResistance.nearestSupport.toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                                 <p>
+                                     Nearest Resistance: {result.supportResistance.nearestResistance.toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                             </div>
+                         </div>
                      </div>
+                 {/if}
 
-                     {#if result.signal && result.signal.type === "NO_SIGNAL"}
+                  {#if (mode === "ict" && result.signal.riskManagement) || (mode === "fighter" && result.meta && result.meta.riskManagement)}
+                      <h3 class="text-xl font-semibold mb-2">Risk Management {mode === "fighter" ? "(Scalping)" : ""}</h3>
+                     <div class="grid gap-4 md:grid-cols-3">
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">Entry</h4>
+                                 <p class="text-2xl">
+                                     {(mode === "fighter" ? result.meta.riskManagement.entry : result.signal.riskManagement.entry).toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                             </div>
+                         </div>
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">Stop Loss</h4>
+                                 <p class="text-2xl">
+                                     {(mode === "fighter" ? result.meta.riskManagement.stopLoss : result.signal.riskManagement.stopLoss).toFixed(
+                                         2,
+                                     )}
+                                 </p>
+                             </div>
+                         </div>
+                         <div class="card bg-base-200">
+                             <div class="card-body p-4">
+                                 <h4 class="font-semibold">Take Profit</h4>
+                                 <p class="text-2xl">
+                                     {(mode === "fighter" ? result.meta.riskManagement.takeProfit : result.signal.riskManagement.takeProfit)
+                                         .map((tp) => tp.toFixed(2))
+                                         .join(", ")}
+                                 </p>
+                             </div>
+                         </div>
+                      </div>
+
+                      {#if result.signal && result.signal.type === "NO_SIGNAL"}
                          <div class="divider"></div>
 
                          <h3 class="text-xl font-semibold mb-2">Prediction for Next Signal</h3>
