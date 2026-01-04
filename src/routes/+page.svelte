@@ -7,25 +7,36 @@
     let meta: any = null;
     let error: string | null = null;
 
-    // Helper to determine signal badge color
     function getSignalClass(signal: string): string {
         if (signal === "BUY") return "badge-success";
         if (signal === "SELL") return "badge-error";
         return "badge-neutral";
     }
 
-    // Helper to get setup phase color
     function getSetupPhaseClass(phase: string): string {
         if (phase === "READY_TO_ENTER") return "badge-success";
         if (phase === "WAITING_FOR_CLOSE") return "badge-warning";
         return "badge-neutral";
     }
 
-    // Helper to get daily bias badge
     function getBiasClass(biasType: string): string {
         if (biasType.includes("BULLISH")) return "badge-success";
         if (biasType.includes("BEARISH")) return "badge-error";
         return "badge-neutral";
+    }
+
+    function getRiskLevelClass(riskLevel: string): string {
+        if (riskLevel === "LOW") return "badge-success";
+        if (riskLevel === "MEDIUM") return "badge-warning";
+        if (riskLevel === "HIGH") return "badge-error";
+        return "badge-neutral";
+    }
+
+    function getRiskIcon(riskLevel: string): string {
+        if (riskLevel === "LOW") return "🟢";
+        if (riskLevel === "MEDIUM") return "🟡";
+        if (riskLevel === "HIGH") return "🔴";
+        return "⚪";
     }
 
     // Main Analyze Function
@@ -158,8 +169,13 @@
                                 {result.signal.signal}
                             </span>
                         </div>
-                        <div class="stat-desc">
+                        <div class="stat-desc flex items-center gap-2">
                             Confidence: {result.signal.confidence.toFixed(1)}%
+                            {#if result.signal.riskLevel && result.signal.signal !== "NO_SIGNAL"}
+                                <span class={`badge ${getRiskLevelClass(result.signal.riskLevel)} badge-sm`}>
+                                    {getRiskIcon(result.signal.riskLevel)} {result.signal.riskLevel}
+                                </span>
+                            {/if}
                         </div>
                     </div>
  
@@ -197,7 +213,21 @@
                 </div>
  
                 <div class="divider"></div>
- 
+
+                {#if meta.riskLevel && result.signal.signal !== "NO_SIGNAL"}
+                    <div class="alert {meta.riskLevel === 'HIGH' ? 'alert-error' : meta.riskLevel === 'MEDIUM' ? 'alert-warning' : 'alert-success'} mb-6">
+                        <span class="text-2xl">{getRiskIcon(meta.riskLevel)}</span>
+                        <div>
+                            <h4 class="font-bold">Risk Level: {meta.riskLevel}</h4>
+                            <p class="text-sm">
+                                {meta.riskLevel === 'HIGH' ? 'High risk trade - proceed with caution. May be contra-bias or have major concerns.'
+                                : meta.riskLevel === 'MEDIUM' ? 'Moderate risk - some concerns present. Monitor carefully.'
+                                : 'Low risk - signal aligns well with market conditions.'}
+                            </p>
+                        </div>
+                    </div>
+                {/if}
+
                 <h3 class="text-xl font-semibold mb-4">Timeframe Alignment</h3>
                 <div class="grid gap-4 md:grid-cols-3">
                     <div class="card bg-base-200">
@@ -260,6 +290,13 @@
                                         ? "✅ Valid (≥2:1)"
                                         : "⚠️ Below 2:1"}
                                 </p>
+                                {#if meta.tradeParameters.riskLevel}
+                                    <div class="mt-2">
+                                        <span class={`badge ${getRiskLevelClass(meta.tradeParameters.riskLevel)} badge-xs`}>
+                                            {getRiskIcon(meta.tradeParameters.riskLevel)} {meta.tradeParameters.riskLevel}
+                                        </span>
+                                    </div>
+                                {/if}
                             </div>
                         </div>
                     </div>
