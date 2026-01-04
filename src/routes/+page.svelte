@@ -32,16 +32,16 @@
         Zap as ZapIcon,
     } from "lucide-svelte";
 
-    let symbol: string = "BTCUSDT";
-    const entryTimeframe: string = "15m";
-    let isLoading: boolean = false;
-    let loadingStep: number = 0;
-    let result: any = null;
-    let meta: any = null;
-    let error: string | null = null;
-    let analysisTimestamp: string = "";
+    let symbol = $state("BTCUSDT");
+    const entryTimeframe = "15m";
+    let isLoading = $state(false);
+    let loadingStep = $state(0);
+    let result = $state<any>(null);
+    let meta = $state<any>(null);
+    let error = $state<string | null>(null);
+    let analysisTimestamp = $state("");
 
-    let collapsedSections: { [key: string]: boolean } = {
+    let collapsedSections = $state<{ [key: string]: boolean }>({
         poi: false,
         cisd: false,
         bias: false,
@@ -53,7 +53,7 @@
         faq1: true,
         faq2: true,
         faq3: true,
-    };
+    });
 
     // Mock statistics data
     const stats = {
@@ -113,19 +113,12 @@
         error = null;
         result = null;
         meta = null;
-        collapsedSections = {
-            poi: false,
-            cisd: false,
-            bias: false,
-            structure: false,
-            setup: false,
-            reasoning: false,
-            risk: false,
-            summary: false,
-            faq1: true,
-            faq2: true,
-            faq3: true,
-        };
+
+        // Reset sections
+        Object.keys(collapsedSections).forEach((key) => {
+            if (key.startsWith("faq")) collapsedSections[key] = true;
+            else collapsedSections[key] = false;
+        });
 
         const loadingInterval = setInterval(() => {
             if (loadingStep < 3) loadingStep++;
@@ -165,7 +158,6 @@
 
 <div class="min-h-screen bg-base-100">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
-        <!-- Hero Section -->
         <div class="text-center mb-12 animate-fade-in">
             <div class="flex items-center justify-center gap-2 mb-4">
                 <div class="badge badge-primary badge-lg gap-1">
@@ -178,7 +170,7 @@
                 </div>
             </div>
             <h1
-                class="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-4"
+                class="text-6xl font-bold bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-4"
             >
                 Sentor Trade
             </h1>
@@ -199,7 +191,6 @@
             </div>
         </div>
 
-        <!-- Features Section -->
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
             <div
                 class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
@@ -270,7 +261,6 @@
             </div>
         </div>
 
-        <!-- Statistics Dashboard -->
         <div class="grid gap-6 md:grid-cols-3 mb-12">
             <div class="stat bg-base-100 shadow-xl rounded-2xl">
                 <div class="stat-title text-base-content/70">
@@ -301,7 +291,6 @@
             </div>
         </div>
 
-        <!-- How It Works Section -->
         <div class="mb-12">
             <h2 class="text-3xl font-bold text-center mb-8">How It Works</h2>
             <div class="grid gap-6 md:grid-cols-3">
@@ -361,7 +350,6 @@
             </div>
         </div>
 
-        <!-- Main Analysis Card -->
         <div
             class="card bg-base-100 shadow-2xl border-2 border-primary/20 mb-12 animate-slide-up"
         >
@@ -388,13 +376,11 @@
                     />
                     <label class="label">
                         <span class="label-text-alt"
-                            >Enter Binance trading pair (e.g., BTCUSDT, ETHUSDT,
-                            SOLUSDT)</span
+                            >Enter Binance trading pair (e.g., BTCUSDT)</span
                         >
                     </label>
                 </div>
 
-                <!-- Quick Symbols -->
                 <div class="mt-6">
                     <label class="label">
                         <span class="label-text font-semibold"
@@ -404,7 +390,7 @@
                     <div class="flex flex-wrap gap-2">
                         {#each quickSymbols as quickSymbol}
                             <button
-                                on:click={() => handleQuickSymbol(quickSymbol)}
+                                onclick={() => handleQuickSymbol(quickSymbol)}
                                 class="btn btn-sm btn-outline gap-1 hover:btn-primary"
                             >
                                 <Play class="w-3 h-3" />
@@ -415,7 +401,7 @@
                 </div>
 
                 <button
-                    on:click={handleAnalyze}
+                    onclick={handleAnalyze}
                     disabled={isLoading}
                     class="btn btn-primary btn-lg w-full mt-6 gap-2"
                 >
@@ -909,7 +895,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("poi")}
+                            onclick={() => toggleSection("poi")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("poi")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -973,7 +963,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("cisd")}
+                            onclick={() => toggleSection("cisd")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("cisd")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1047,7 +1041,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("bias")}
+                            onclick={() => toggleSection("bias")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("bias")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1119,7 +1117,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("structure")}
+                            onclick={() => toggleSection("structure")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("structure")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1154,7 +1156,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("setup")}
+                            onclick={() => toggleSection("setup")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("setup")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1189,7 +1195,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("reasoning")}
+                            onclick={() => toggleSection("reasoning")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("reasoning")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1224,7 +1234,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("risk")}
+                            onclick={() => toggleSection("risk")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("risk")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1259,7 +1273,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("summary")}
+                            onclick={() => toggleSection("summary")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("summary")}
                         >
                             <h3
                                 class="text-xl font-bold flex items-center gap-2"
@@ -1292,7 +1310,7 @@
 
                 <div class="text-center py-8">
                     <button
-                        on:click={handleAnalyze}
+                        onclick={handleAnalyze}
                         class="btn btn-outline btn-lg gap-2"
                     >
                         <RefreshCw class="w-5 h-5" />
@@ -1302,7 +1320,6 @@
             </div>
         {/if}
 
-        <!-- FAQ Section -->
         <div class="mb-12">
             <h2
                 class="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2"
@@ -1316,7 +1333,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("faq1")}
+                            onclick={() => toggleSection("faq1")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("faq1")}
                         >
                             <h3
                                 class="text-lg font-bold flex items-center gap-2"
@@ -1348,7 +1369,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("faq2")}
+                            onclick={() => toggleSection("faq2")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("faq2")}
                         >
                             <h3
                                 class="text-lg font-bold flex items-center gap-2"
@@ -1380,7 +1405,11 @@
                     <div class="card-body">
                         <div
                             class="flex items-center justify-between cursor-pointer"
-                            on:click={() => toggleSection("faq3")}
+                            onclick={() => toggleSection("faq3")}
+                            role="button"
+                            tabindex="0"
+                            onkeydown={(e) =>
+                                e.key === "Enter" && toggleSection("faq3")}
                         >
                             <h3
                                 class="text-lg font-bold flex items-center gap-2"
@@ -1398,7 +1427,7 @@
                             <div class="mt-4 pt-4 border-t border-base-300">
                                 <p class="text-base-content/80">
                                     We analyze across three timeframes: Bias
-                                    timeframe (1D), Structure timeframe (1h),
+                                    timeframe (4h), Structure timeframe (1h),
                                     and Entry timeframe (15m). This
                                     multi-timeframe approach ensures signals are
                                     aligned with the broader market trend while
