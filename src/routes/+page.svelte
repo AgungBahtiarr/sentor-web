@@ -1398,7 +1398,7 @@
                             <div class="mt-4 pt-4 border-t border-base-300">
                                 <p class="text-base-content/80">
                                     We analyze across three timeframes: Bias
-                                    timeframe (4h), Structure timeframe (1h),
+                                    timeframe (1D), Structure timeframe (1h),
                                     and Entry timeframe (15m). This
                                     multi-timeframe approach ensures signals are
                                     aligned with the broader market trend while
