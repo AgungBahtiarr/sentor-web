@@ -1,52 +1,49 @@
 <script lang="ts">
     // State variables
     let symbol: string = "BTCUSDT";
-    let timeframe: string = "15m";
+    const entryTimeframe: string = "15m";
     let isLoading: boolean = false;
     let result: any = null;
     let meta: any = null;
     let error: string | null = null;
- 
-    // Options configuration
-    const timeframeOptions = ["1m", "3m", "5m", "15m", "30m", "1h", "4h", "1d"];
- 
+
     // Helper to determine signal badge color
     function getSignalClass(signal: string): string {
         if (signal === "BUY") return "badge-success";
         if (signal === "SELL") return "badge-error";
         return "badge-neutral";
     }
- 
+
     // Helper to get setup phase color
     function getSetupPhaseClass(phase: string): string {
         if (phase === "READY_TO_ENTER") return "badge-success";
         if (phase === "WAITING_FOR_CLOSE") return "badge-warning";
         return "badge-neutral";
     }
- 
+
     // Helper to get daily bias badge
     function getBiasClass(biasType: string): string {
         if (biasType.includes("BULLISH")) return "badge-success";
         if (biasType.includes("BEARISH")) return "badge-error";
         return "badge-neutral";
     }
- 
+
     // Main Analyze Function
     async function handleAnalyze() {
         isLoading = true;
         error = null;
         result = null;
         meta = null;
- 
+
         try {
             const params = new URLSearchParams();
             params.append("symbol", symbol.toUpperCase());
-            params.append("timeframe", timeframe);
- 
+            params.append("timeframe", entryTimeframe);
+
             const baseUrl = import.meta.env.VITE_API_URL || "";
             const response = await fetch(`${baseUrl}/api/trading/analyze?${params.toString()}`);
             const data = await response.json();
- 
+
             if (data.success) {
                 result = data.data;
                 meta = data.meta;
@@ -87,20 +84,7 @@
                     />
                 </div>
  
-                <div class="form-control">
-                    <label class="label" for="timeframe">
-                        <span class="label-text font-semibold">Entry Timeframe</span>
-                    </label>
-                    <select
-                        id="timeframe"
-                        bind:value={timeframe}
-                        class="select select-bordered w-full"
-                    >
-                        {#each timeframeOptions as tf}
-                            <option value={tf}>{tf}</option>
-                        {/each}
-                    </select>
-                </div>
+
  
                 <button
                     on:click={handleAnalyze}
